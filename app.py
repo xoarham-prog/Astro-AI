@@ -9,14 +9,14 @@ HF_TOKEN = "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"
 # 2. PROFESSIONAL PAGE CONFIG
 st.set_page_config(page_title="Astro AI - Pro", page_icon="🚀", layout="centered")
 
-# Custom CSS for Premium Look
+# Custom CSS for Premium Look (FIXED ERROR HERE)
 st.markdown("""
     <style>
     .main { background-color: #0e1117; color: white; }
     .stButton>button { width: 100%; border-radius: 20px; background-color: #2e7bcf; color: white; }
     .stTextInput>div>div>input { border-radius: 15px; }
     </style>
-    """, unsafe_allow_now_safe=True)
+    """, unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
@@ -45,13 +45,12 @@ if mode == "💬 Smart Chat":
 
         try:
             client = Groq(api_key=GROQ_API_KEY)
-            # System instruction added for language flexibility
             response = client.chat.completions.create(
                 messages=[
                     {"role": "system", "content": "You are Astro AI. Reply in the same language the user uses (English, Urdu, or Roman Urdu). Be helpful and smart."},
                     {"role": "user", "content": prompt}
                 ],
-                model="llama3-70b-8192", # Higher model for better logic
+                model="llama3-70b-8192", 
             )
             full_response = response.choices.message.content
             with st.chat_message("assistant"):
@@ -71,12 +70,11 @@ else:
         if img_prompt:
             with st.spinner("Astro is creating your image..."):
                 try:
-                    # Switched to a more reliable model endpoint
                     API_URL = "https://huggingface.co"
                     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
                     response = requests.post(API_URL, headers=headers, json={"inputs": img_prompt})
                     if response.status_code == 200:
-                        st.image(response.content, use_column_width=True)
+                        st.image(response.content, use_container_width=True)
                     else:
                         st.error("AI is busy. Please try in 10 seconds.")
                 except:
