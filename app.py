@@ -2,49 +2,34 @@ import streamlit as st
 from groq import Groq
 import requests
 
-# 1. SETUP & KEYS
+# 1. API KEYS
 GROQ_API_KEY = "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"
 HF_TOKEN = "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"
 
-# 2. ULTRA PREMIUM INTERFACE CONFIG
-st.set_page_config(page_title="Astro AI", page_icon="🚀", layout="wide")
+# 2. CLEAN PROFESSIONAL UI
+st.set_page_config(page_title="Astro AI", page_icon="🚀")
 
-# Custom CSS for Neon Dark Look
+# Simple Dark Theme (No more messy colors)
 st.markdown("""
     <style>
-    .stApp {
-        background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-        color: #ffffff;
-    }
-    section[data-testid="stSidebar"] {
-        background-color: rgba(0, 0, 0, 0.8) !important;
-        border-right: 2px solid #00f2fe;
-    }
-    .stTextInput input, .stChatInput textarea {
-        background-color: #1a1a1a !important;
-        color: white !important;
-        border: 1px solid #00f2fe !important;
-    }
-    div.stButton > button:first-child {
-        background: linear-gradient(45deg, #00f2fe, #4facfe);
-        color: black; font-weight: bold; border-radius: 20px;
-    }
-    /* Text Visibility Fix */
-    p, span, label { color: white !important; font-size: 18px !important; }
+    .stApp { background-color: #121212; color: #FFFFFF; }
+    [data-testid="stSidebar"] { background-color: #1e1e1e !important; }
+    .stTextInput input { background-color: #2d2d2d !important; color: white !important; border: 1px solid #444 !important; }
+    div.stButton > button { background-color: #007bff; color: white; border-radius: 5px; border: none; width: 100%; }
+    .stChatMessage { background-color: #2d2d2d !important; border-radius: 10px; padding: 10px; margin-bottom: 5px; }
     </style>
     """, unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
-    st.markdown("<h1 style='color: #00f2fe;'>🚀 ASTRO AI</h1>", unsafe_allow_html=True)
+    st.title("🚀 Astro AI")
+    mode = st.radio("Menu", ["💬 Chat", "🎨 Image"])
     st.markdown("---")
-    mode = st.radio("CHOOSE MODULE", ["💬 AI CHATBOT", "🎨 IMAGE STUDIO"])
-    st.markdown("---")
-    st.success("Status: Online 🟢")
+    st.write("Status: 🟢 Active")
 
-# --- CHATBOT SECTION ---
-if mode == "💬 AI CHATBOT":
-    st.markdown("<h2 style='color: #00f2fe;'>Astro Smart Assistant</h2>", unsafe_allow_html=True)
+# --- CHAT SECTION ---
+if mode == "💬 Chat":
+    st.subheader("Astro Smart Chat")
     
     if "messages" not in st.session_state:
         st.session_state.messages = []
@@ -53,33 +38,34 @@ if mode == "💬 AI CHATBOT":
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    if prompt := st.chat_input("Ask anything (English/Roman Urdu)..."):
+    if prompt := st.chat_input("Baat karein..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
 
         try:
+            # Using a more stable model
             client = Groq(api_key=GROQ_API_KEY)
             response = client.chat.completions.create(
                 messages=[
-                    {"role": "system", "content": "You are Astro AI. Reply in the same language the user uses (Roman Urdu/English)."},
+                    {"role": "system", "content": "You are Astro AI. Reply in the same language user uses (Roman Urdu/English)."},
                     {"role": "user", "content": prompt}
                 ],
-                model="llama-3.3-70b-versatile", 
+                model="llama3-8b-8192", 
             )
             res = response.choices.message.content
             with st.chat_message("assistant"):
                 st.write(res)
             st.session_state.messages.append({"role": "assistant", "content": res})
-        except:
-            st.error("AI is thinking hard. Please refresh or try again!")
+        except Exception as e:
+            st.error("Wait! AI is taking a break. Please refresh the page.")
 
 # --- IMAGE SECTION ---
 else:
-    st.markdown("<h2 style='color: #4facfe;'>Astro Image Creator</h2>", unsafe_allow_html=True)
-    prompt_img = st.text_input("Describe your imagination:")
+    st.subheader("Astro Image Creator")
+    prompt_img = st.text_input("Enter prompt (e.g. A futuristic car in Lahore):")
     
-    if st.button("Generate Now"):
+    if st.button("Generate Image"):
         if prompt_img:
             with st.spinner("Creating..."):
                 API_URL = "https://huggingface.co"
@@ -88,4 +74,4 @@ else:
                 if response.status_code == 200:
                     st.image(response.content)
                 else:
-                    st.info("Image server busy. Try again in 10 seconds.")
+                    st.warning("Server is busy. Try again in a few seconds.")
